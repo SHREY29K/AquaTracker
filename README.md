@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌊 AquaTrack — Water Intake Tracker
 
-## Getting Started
+**AquaTrack** is a modern, full-stack water intake and health tracking application designed to help users build better hydration habits.  
+Built with **Next.js 14**, **Supabase**, and **Framer Motion**, it combines clean UI, smooth animations, and practical health utilities.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 💧 Core Features
+- **Beautiful Water Tracking** — Animated water glass with realistic liquid fill effects
+- **Statistics Dashboard** — Track daily, weekly, and monthly hydration progress
+- **Smart Reminders** — Browser push notifications to remind users to drink water
+- **Goal Setting** — Customizable daily water intake goals
+- **Streak Tracking** — Stay motivated with daily streak counters
+- **PWA Support** — Installable as a mobile app with offline functionality
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🏥 Health Utilities
+- 📏 **BMI Calculator**
+- 🔢 **Calorie Estimator**
+- 💧 **Personalized Hydration Calculator**
+- 😴 **Sleep Tracker**
+- 👟 **Step Counter**
+- 📚 **Health Tips Library**
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+### 🛠️ Technical Highlights
+- 🎨 Smooth animations using **Framer Motion**
+- 🌙 Dark mode support
+- 📱 Fully responsive design (mobile-first)
+- 🔐 Secure authentication (Email & Google OAuth)
+- ⚡ Real-time updates powered by **Supabase**
+- 🎯 End-to-end type safety with **TypeScript**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧱 Tech Stack
 
-## Deploy on Vercel
+- **Frontend:** Next.js 14, React, TypeScript
+- **Backend & Auth:** Supabase
+- **Animations:** Framer Motion
+- **Styling:** Tailwind CSS
+- **State & Data:** Supabase Realtime
+- **PWA:** Service Workers & Web App Manifest
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/your-username/aquatrack.git
+cd aquatrack
