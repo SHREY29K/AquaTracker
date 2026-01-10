@@ -15,7 +15,58 @@ const WaterTrackerReal = () => {
 
     const waterIntake = logs.reduce((sum, log) => sum + log.amount, 0);
     const percentage = Math.min((waterIntake / dailyGoal) * 100, 100);
-    const streak = 7; // TODO: Calculate real streak
+    // Calculate real streak
+    const [streak, setStreak] = useState(0);
+
+    useEffect(() => {
+        const calculateStreak = () => {
+            if (logs.length === 0) {
+                setStreak(0);
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Get unique dates
+            const uniqueDates = new Set(
+                logs.map(log => {
+                    const date = new Date(log.logged_at);
+                    date.setHours(0, 0, 0, 0);
+                    return date.toDateString();
+                })
+            );
+
+            // Check if there's activity today
+            const hasToday = Array.from(uniqueDates).some(dateStr => {
+                return new Date(dateStr).getTime() === today.getTime();
+            });
+
+            if (!hasToday && uniqueDates.size === 0) {
+                setStreak(0);
+                return;
+            }
+
+            let currentStreak = 1;
+
+            // Count consecutive days backwards
+            for (let i = 1; i < 365; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(checkDate.getDate() - i);
+                const dateString = checkDate.toDateString();
+
+                if (uniqueDates.has(dateString)) {
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+
+            setStreak(currentStreak);
+        };
+
+        calculateStreak();
+    }, [logs]);
 
     const handleAddWater = async (amount: number) => {
         const previousIntake = waterIntake;
