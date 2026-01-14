@@ -7,11 +7,11 @@ import { calculateBMI, calculateCalories } from '@/types';
 export default function UtilitiesPage() {
     return (
         <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 Health Utilities
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <BMICalculator />
                 <CalorieCalculator />
                 <HydrationCalculator />

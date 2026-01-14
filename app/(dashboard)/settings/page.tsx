@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Settings as SettingsIcon, Bell, Droplet, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export default function SettingsPage() {
     const { user } = useAuth();
@@ -17,6 +18,16 @@ export default function SettingsPage() {
     const [glassSize, setGlassSize] = useState(250);
     const [unit, setUnit] = useState<'ml' | 'oz' | 'cups'>('ml');
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+    const { permission, isEnabled, toggleNotifications, scheduleReminders } = useNotifications();
+    const [reminderInterval, setReminderInterval] = useState(120); // minutes
+
+    useEffect(() => {
+        const savedInterval = localStorage.getItem('reminder_interval');
+        if (savedInterval) {
+            setReminderInterval(Number(savedInterval));
+        }
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -88,7 +99,7 @@ export default function SettingsPage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 Settings
             </h1>
 
@@ -152,7 +163,7 @@ export default function SettingsPage() {
                         <button
                             onClick={handleSaveSettings}
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-lg hover:from-blue-600 hover:to-cyan-600 font-semibold disabled:opacity-50"
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2.5 sm:py-3 rounded-lg hover:from-blue-600 hover:to-cyan-600 font-semibold disabled:opacity-50 text-sm sm:text-base"
                         >
                             {loading ? 'Saving...' : 'Save Preferences'}
                         </button>
@@ -163,10 +174,10 @@ export default function SettingsPage() {
                 <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl p-6 border border-white/50">
                     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                         <Bell className="w-6 h-6 text-orange-600" />
-                        Notifications
+                        Notifications & Reminders
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <div className="font-medium">Enable Reminders</div>
@@ -175,18 +186,78 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                             <button
-                                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                                onClick={() => toggleNotifications(!isEnabled)}
                                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                    notificationsEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                                    isEnabled ? 'bg-blue-600' : 'bg-gray-300'
                                 }`}
                             >
-                <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                />
+                                <span
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                        isEnabled ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
                             </button>
                         </div>
+
+                        {permission === 'denied' && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-sm text-red-600">
+                                    ⚠️ Notifications are blocked. Please enable them in your browser settings.
+                                </p>
+                            </div>
+                        )}
+
+                        {isEnabled && (
+                            <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">
+                                        Reminder Interval
+                                    </label>
+                                    <select
+                                        value={reminderInterval}
+                                        onChange={(e) => {
+                                            const interval = Number(e.target.value);
+                                            setReminderInterval(interval);
+                                            localStorage.setItem('reminder_interval', interval.toString());
+                                            if (isEnabled) {
+                                                scheduleReminders(interval);
+                                                toast.success(`Reminders set to every ${interval / 60} hours`);
+                                            }
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                        <option value="60">Every 1 hour</option>
+                                        <option value="90">Every 1.5 hours</option>
+                                        <option value="120">Every 2 hours</option>
+                                        <option value="180">Every 3 hours</option>
+                                        <option value="240">Every 4 hours</option>
+                                    </select>
+                                </div>
+
+                                <div className="p-3 bg-white rounded-lg border border-blue-200">
+                                    <p className="text-sm text-gray-700">
+                                        <strong>Active hours:</strong> 8:00 AM - 10:00 PM
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Reminders will only be sent during these hours
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        const { sendNotification } = require('@/hooks/useNotifications');
+                                        new Notification('💧 Time to Hydrate!', {
+                                            body: 'Don\'t forget to drink some water. Stay healthy!',
+                                            icon: '/icons/icon-192.png',
+                                        });
+                                        toast.success('Test notification sent!');
+                                    }}
+                                    className="w-full px-4 py-2 border-2 border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 font-semibold"
+                                >
+                                    Send Test Notification
+                                </button>
+                            </div>
+                        )}
 
                         <p className="text-sm text-gray-500 p-3 bg-blue-50 rounded-lg">
                             💡 Tip: Browser notifications help you stay on track with your hydration goals!

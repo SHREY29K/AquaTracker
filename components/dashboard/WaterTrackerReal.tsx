@@ -5,11 +5,32 @@ import { Droplets, Plus, TrendingUp, Award, Target, Sparkles, Trash2 } from 'luc
 import { useAuth } from '@/hooks/useAuth';
 import { useWaterLog } from '@/hooks/useWaterLog';
 import toast from 'react-hot-toast';
+import { supabase } from '@/lib/supabase/client';
 
 const WaterTrackerReal = () => {
     const { user } = useAuth();
+    const [customAmount, setCustomAmount] = useState('');
     const { logs, loading, addLog, deleteLog } = useWaterLog(user?.id);
-    const [dailyGoal] = useState(2000);
+    const [dailyGoal, setDailyGoal] = useState(2000);
+
+// Load user's daily goal from database
+    useEffect(() => {
+        const loadDailyGoal = async () => {
+            if (!user?.id) return;
+
+            const { data } = await supabase
+                .from('profiles')
+                .select('daily_goal')
+                .eq('user_id', user.id)
+                .single();
+
+            if (data && data.daily_goal) {
+                setDailyGoal(data.daily_goal);
+            }
+        };
+
+        loadDailyGoal();
+    }, [user]);
     const [showCelebration, setShowCelebration] = useState(false);
     const [animateWave, setAnimateWave] = useState(false);
 
@@ -107,12 +128,12 @@ const WaterTrackerReal = () => {
 
     return (
         <div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Main Water Tracker Card */}
                 <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
                     <div className="flex flex-col items-center">
                         {/* Water Glass Visualization */}
-                        <div className="relative w-64 h-80 mb-6">
+                        <div className="relative w-48 sm:w-64 h-64 sm:h-80 mb-6">
                             <div className="absolute inset-0 border-4 border-blue-300 rounded-b-[50px] rounded-t-lg overflow-hidden bg-gradient-to-b from-blue-50/30 to-transparent">
                                 <div
                                     className={`absolute bottom-0 w-full bg-gradient-to-t ${getWaterColor()} transition-all duration-1000 ease-out`}
@@ -142,17 +163,46 @@ const WaterTrackerReal = () => {
                         </div>
 
                         {/* Quick Add Buttons */}
-                        <div className="grid grid-cols-4 gap-3 w-full max-w-md mb-6">
-                            {[250, 500, 750, 1000].map((amount) => (
+                        <div className="w-full max-w-md mb-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                                {[250, 500, 750, 1000].map((amount) => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => handleAddWater(amount)}
+                                        className="bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl sm:rounded-2xl py-3 sm:py-4 px-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-semibold text-sm sm:text-base"
+                                    >
+                                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-1" />
+                                        {amount}ml
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Custom Amount Input */}
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    value={customAmount}
+                                    onChange={(e) => setCustomAmount(e.target.value)}
+                                    placeholder="Custom amount (ml)"
+                                    className="flex-1 px-4 py-3 border-2 border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center font-semibold"
+                                    min="1"
+                                    max="5000"
+                                />
                                 <button
-                                    key={amount}
-                                    onClick={() => handleAddWater(amount)}
-                                    className="bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-2xl py-4 px-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-semibold"
+                                    onClick={() => {
+                                        const amount = Number(customAmount);
+                                        if (amount > 0 && amount <= 5000) {
+                                            handleAddWater(amount);
+                                            setCustomAmount('');
+                                        } else {
+                                            toast.error('Please enter amount between 1-5000ml');
+                                        }
+                                    }}
+                                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                                 >
-                                    <Plus className="w-5 h-5 mx-auto mb-1" />
-                                    {amount}ml
+                                    <Plus className="w-5 h-5" />
                                 </button>
-                            ))}
+                            </div>
                         </div>
 
                         {/* Status Message */}
